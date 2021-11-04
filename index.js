@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'; // eslint-disable-line
 import PropTypes from 'prop-types';
 import {
   Image,
@@ -10,8 +10,7 @@ import {
   TouchableOpacity,
   View,
   ViewPropTypes,
-} from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+} from 'react-native'; // eslint-disable-line
 import Video from 'react-native-video'; // eslint-disable-line
 
 const BackgroundImage = ImageBackground || Image; // fall back to Image if RN < 0.46
@@ -63,9 +62,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  playArrow: {
-    color: 'white',
-  },
   video:
     Platform.Version >= 24
       ? {}
@@ -79,8 +75,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  playControl: {
-    color: 'white',
+  controlButton: {
     padding: 8,
   },
   seekBar: {
@@ -412,17 +407,13 @@ export default class VideoPlayer extends Component {
   }
 
   renderStartButton() {
-    const { customStyles } = this.props;
+    const { customStyles, iconRenderers } = this.props;
     return (
       <TouchableOpacity
         style={[styles.playButton, customStyles.playButton]}
         onPress={this.onStartPress}
       >
-        <Icon
-          style={[styles.playArrow, customStyles.playArrow]}
-          name="play-arrow"
-          size={42}
-        />
+        {iconRenderers.start()}
       </TouchableOpacity>
     );
   }
@@ -498,22 +489,14 @@ export default class VideoPlayer extends Component {
   }
 
   renderControls() {
-    const { customStyles, showDuration } = this.props;
+    const { customStyles, showDuration, iconRenderers } = this.props;
     return (
       <View style={[styles.controls, customStyles.controls]}>
         <TouchableOpacity
           onPress={this.onPlayPress}
-          style={[customStyles.controlButton, customStyles.playControl]}
+          style={[styles.controlButton, customStyles.controlButton]}
         >
-          <Icon
-            style={[
-              styles.playControl,
-              customStyles.controlIcon,
-              customStyles.playIcon,
-            ]}
-            name={this.state.isPlaying ? 'pause' : 'play-arrow'}
-            size={32}
-          />
+          {this.state.isPlaying ? iconRenderers.pause() : iconRenderers.play()}
         </TouchableOpacity>
         {this.renderSeekBar()}
         {showDuration && (
@@ -541,25 +524,19 @@ export default class VideoPlayer extends Component {
         {this.props.muted ? null : (
           <TouchableOpacity
             onPress={this.onMutePress}
-            style={customStyles.controlButton}
+            style={[styles.controlButton, customStyles.controlButton]}
           >
-            <Icon
-              style={[styles.extraControl, customStyles.controlIcon]}
-              name={this.state.isMuted ? 'volume-off' : 'volume-up'}
-              size={24}
-            />
+            {this.state.isMuted
+              ? iconRenderers.audioOff()
+              : iconRenderers.audioOn()}
           </TouchableOpacity>
         )}
         {Platform.OS === 'android' || this.props.disableFullscreen ? null : (
           <TouchableOpacity
             onPress={this.onToggleFullScreen}
-            style={customStyles.controlButton}
+            style={[styles.controlButton, customStyles.controlButton]}
           >
-            <Icon
-              style={[styles.extraControl, customStyles.controlIcon]}
-              name="fullscreen"
-              size={32}
-            />
+            {iconRenderers.fullscreen()}
           </TouchableOpacity>
         )}
       </View>
@@ -615,8 +592,9 @@ export default class VideoPlayer extends Component {
               if (pauseOnPress) this.onPlayPress();
             }}
             onLongPress={() => {
-              if (fullScreenOnLongPress && Platform.OS !== 'android')
+              if (fullScreenOnLongPress && Platform.OS !== 'android') {
                 this.onToggleFullScreen();
+              }
             }}
           />
         </View>
@@ -685,10 +663,7 @@ VideoPlayer.propTypes = {
     video: Video.propTypes.style,
     videoWrapper: ViewPropTypesVar.style,
     controls: ViewPropTypesVar.style,
-    playControl: ViewPropTypesVar.style,
     controlButton: ViewPropTypesVar.style,
-    controlIcon: Icon.propTypes.style,
-    playIcon: Icon.propTypes.style,
     seekBar: ViewPropTypesVar.style,
     seekBarFullWidth: ViewPropTypesVar.style,
     seekBarProgress: ViewPropTypesVar.style,
@@ -697,7 +672,6 @@ VideoPlayer.propTypes = {
     seekBarBackground: ViewPropTypesVar.style,
     thumbnail: Image.propTypes.style,
     playButton: ViewPropTypesVar.style,
-    playArrow: Icon.propTypes.style,
     durationText: ViewPropTypesVar.style,
   }),
   onEnd: PropTypes.func,
@@ -709,6 +683,14 @@ VideoPlayer.propTypes = {
   onShowControls: PropTypes.func,
   onMutePress: PropTypes.func,
   showDuration: PropTypes.bool,
+  iconRenderers: PropTypes.shape({
+    play: PropTypes.func,
+    pause: PropTypes.func,
+    audioOn: PropTypes.func,
+    audioOff: PropTypes.func,
+    fullscreen: PropTypes.func,
+    start: PropTypes.func,
+  }),
 };
 
 VideoPlayer.defaultProps = {
@@ -723,4 +705,12 @@ VideoPlayer.defaultProps = {
   fullScreenOnLongPress: false,
   customStyles: {},
   showDuration: false,
+  iconRenderers: {
+    play: () => <Text>PlayIcon</Text>,
+    pause: () => <Text>PauseIcon</Text>,
+    audioOff: () => <Text>AudioOffIcon</Text>,
+    audioOn: () => <Text>AudioOnIcon</Text>,
+    fullscreen: () => <Text>FullscreenIcon</Text>,
+    start: () => <Text>StartIcon</Text>,
+  },
 };
