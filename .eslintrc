@@ -1,7 +1,14 @@
 {
-  "extends": "airbnb",
+  "extends": ["airbnb"],
+  "plugins": ["prettier"],
   "rules": {
-    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }]
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/destructuring-assignment": 0,
+    "prettier/prettier": 1,
+    "react/require-default-props": 0,
+    "react/jsx-props-no-spreading": 0,
+    "class-methods-use-this": 0,
+    "indent": 0
   },
   "parserOptions": {
     "ecmaFeatures": {
